@@ -1,0 +1,789 @@
+MODEL COMPRESSION PROJECT — UNDERSTANDING NOTES
+
+Purpose
+
+This file records the concepts, decisions, architecture discussions, and
+understanding developed while working on the semester project. It should
+be updated as new project concepts are discussed.
+
+Project Title
+
+Model Compression using Huffman Coding
+
+Core Problem
+
+Build a tool that compresses the numerical parameters (weights) stored
+inside a trained machine-learning model using Huffman coding. The
+compression and decompression must be lossless for the primary
+implementation. The project should measure model size before/after
+compression and verify that the model remains unchanged after
+decompression.
+
+Project Evaluation Focus
+
+The project guidelines emphasize: - Correctness and functionality -
+Appropriate data-structure selection - Data-structure implementation -
+Algorithmic logic - Justification of design decisions - Meaningful
+integration - Clear explanation of individual contributions
+
+The frontend is only required to be basic and functional. The main focus
+is the data structures and algorithms.
+
+1. Overall Project Understanding
+
+The project combines three technical areas:
+
+    Machine Learning
+        |
+        v
+    Trained model / model weights
+        |
+        v
+    DSA-based Huffman compression
+        |
+        v
+    Compressed representation
+        |
+        v
+    Decompression
+        |
+        v
+    Exact reconstruction + verification
+
+The ML model is mainly the data source/test subject. The core
+intellectual focus of the project is the DSA-based compression engine.
+
+2. Why We Need a Trained Model
+
+We do need a trained model, but we do NOT need to build a complicated ML
+architecture from scratch.
+
+A simple neural network trained on MNIST is sufficient as the
+demonstration model.
+
+The model can be created and trained using PyTorch. We do not need to
+implement neural-network training ourselves.
+
+Example architecture discussed:
+
+    784 input values (28 x 28 MNIST image)
+            |
+          128
+            |
+           64
+            |
+           10 output classes
+
+After training, the learned parameters/weights become the input to our
+compression system.
+
+Conceptually:
+
+    MNIST
+      |
+      v
+    Train small neural network
+      |
+      v
+    Trained model
+      |
+      v
+    Extract model parameters
+      |
+      v
+    Huffman compression
+
+3. MNIST
+
+MNIST is a standard handwritten-digit dataset.
+
+-   Images represent digits 0 through 9.
+-   Each image is 28 x 28 pixels.
+-   Images are grayscale.
+-   Standard MNIST contains 60,000 training images and 10,000 test
+    images.
+
+MNIST is useful because it gives us a simple and standard ML problem
+without making model training the main focus of the project.
+
+4. What Exactly Are Model Weights?
+
+A simple neuron can be represented as:
+
+    z = w1*x1 + w2*x2 + ... + wn*xn + b
+
+The weights determine how strongly inputs influence a neuron.
+
+During training, the model repeatedly makes predictions, calculates
+error, computes gradients, and updates its parameters.
+
+After training, the model contains learned parameters such as:
+
+-   weights
+-   biases
+
+These parameters are what our compression system will process.
+
+PyTorch provides access to model parameters through mechanisms such as:
+
+    model.state_dict()
+
+Conceptually:
+
+    state_dict
+        |
+        +-- layer1.weight
+        +-- layer1.bias
+        +-- layer2.weight
+        +-- layer2.bias
+        +-- ...
+
+5. Main Data Structures
+
+The core project will use the following data structures:
+
+A. Dictionary / Hash Map
+
+Purpose: - Count frequencies of symbols/values. - Store Huffman codes.
+
+Examples:
+
+    value -> frequency
+
+    A -> 6
+    B -> 4
+    C -> 3
+    D -> 1
+
+and:
+
+    value -> Huffman code
+
+    A -> 0
+    B -> 10
+    C -> 111
+    D -> 110
+
+Average dictionary lookup/insertion is O(1).
+
+B. Huffman Node
+
+A Huffman node needs information such as:
+
+    value
+    frequency
+    left
+    right
+
+Leaf nodes represent actual symbols/values. Internal nodes represent
+combined frequencies and generally have no actual symbol value.
+
+C. Priority Queue
+
+A priority queue is an abstract data type that lets us retrieve an
+element according to priority.
+
+For Huffman coding we need a MIN-priority queue:
+
+    smaller frequency = higher priority
+
+D. Min-Heap
+
+A min-heap is a concrete data structure that can implement a
+min-priority queue efficiently.
+
+Important distinction:
+
+    Priority Queue = abstract interface / ADT
+    Min-Heap       = concrete implementation
+
+For the project, the intended design is:
+
+    Min-priority queue implemented using our own custom min-heap.
+
+The project should avoid using Python’s built-in heapq as the core heap
+implementation because the assignment emphasizes implementing and
+explaining data structures.
+
+6. Min-Heap Understanding
+
+A min-heap is a complete binary tree satisfying:
+
+    parent <= children
+
+The smallest element is always at the root.
+
+A heap does NOT mean the entire collection is sorted.
+
+Example:
+
+                1
+              /   \
+             3     4
+            / \   /
+           6   8 7
+
+The heap can be stored efficiently in a Python list.
+
+For an element at index i:
+
+    left child  = 2*i + 1
+    right child = 2*i + 2
+    parent      = (i-1)//2
+
+Important operations:
+
+    insert()      -> O(log n)
+    extract_min() -> O(log n)
+    peek()        -> O(1)
+
+Insertion uses heapify-up.
+
+Extract-min removes the root, moves the last element to the root, and
+uses heapify-down to restore the heap property.
+
+During heapify-down, compare both children and swap with the smaller
+child.
+
+In Huffman coding, the heap stores HuffmanNode objects and compares
+their frequency values.
+
+7. Why Huffman Needs a Min-Heap
+
+Huffman repeatedly needs the two least-frequent nodes.
+
+Example frequencies:
+
+    A -> 6
+    B -> 4
+    C -> 3
+    D -> 1
+
+The algorithm repeatedly does:
+
+    extract smallest
+    extract second smallest
+    combine them
+    insert combined node
+    repeat
+
+A min-heap makes these operations efficient.
+
+The heap is primarily needed while constructing the Huffman tree. Once
+the tree has been constructed, the tree is used for encoding and
+decoding.
+
+8. Huffman Coding
+
+Basic algorithm:
+
+1.  Count frequency of every symbol/value.
+2.  Create a HuffmanNode for each unique symbol.
+3.  Insert all nodes into a min-heap.
+4.  Extract the two nodes with the smallest frequencies.
+5.  Create a new internal node whose frequency is their sum.
+6.  Make the two extracted nodes its children.
+7.  Insert the new node back into the heap.
+8.  Repeat until only one node remains.
+9.  The remaining node is the root of the Huffman tree.
+10. Traverse the tree to generate codes.
+
+Convention:
+
+    left  -> 0
+    right -> 1
+
+Frequent symbols generally receive shorter codes.
+
+9. Example Huffman Tree
+
+Frequencies:
+
+    A = 6
+    B = 4
+    C = 3
+    D = 1
+
+Construction:
+
+    D(1) + C(3) -> 4
+    B(4) + 4    -> 8
+    A(6) + 8    -> 14
+
+One possible tree:
+
+                  (14)
+                 /    \
+               A(6)   (8)
+                     /   \
+                   B(4)  (4)
+                         /   \
+                       D(1) C(3)
+
+With left=0 and right=1:
+
+    A -> 0
+    B -> 10
+    D -> 110
+    C -> 111
+
+Exact codes can differ when frequencies tie, but the resulting Huffman
+encoding remains valid.
+
+10. Prefix-Free Codes
+
+Huffman codes are prefix-free.
+
+No complete code is the prefix/beginning of another complete code.
+
+Example:
+
+    A -> 0
+    B -> 10
+    D -> 110
+    C -> 111
+
+This property makes decoding unambiguous.
+
+Example bitstream:
+
+    0 | 110 | 111
+
+can be decoded as:
+
+    A | D | C
+
+11. Encoding and Decoding
+
+Encoding:
+
+    original symbols
+          |
+          v
+    Huffman code lookup
+          |
+          v
+    sequence of bits
+          |
+          v
+    packed bytes
+
+Decoding:
+
+    packed bytes / bitstream
+          |
+          v
+    traverse Huffman tree bit-by-bit
+          |
+          v
+    reach leaf
+          |
+          v
+    recover symbol
+          |
+          v
+    repeat
+
+12. Bits and Bytes
+
+A bit is either 0 or 1.
+
+A byte contains 8 bits.
+
+We should NOT store a Huffman bitstream as ordinary strings such as
+“010110…” because each character in a normal text string consumes much
+more storage than one bit.
+
+Instead, Huffman bits should eventually be packed into actual bytes.
+
+This introduces concepts such as:
+
+-   bits
+-   bytes
+-   bytearray
+-   binary files
+-   bit packing
+-   padding bits
+
+13. Lossless Compression
+
+The primary project must be lossless.
+
+Required behavior:
+
+    Original data
+        |
+        v
+    Compress
+        |
+        v
+    Decompress
+        |
+        v
+    EXACT ORIGINAL DATA
+
+For the model, a strong correctness check is:
+
+    original weights == decompressed weights
+
+Ideally:
+
+    max(abs(original - decoded)) = 0
+
+Accuracy comparison alone is not enough because two different parameter
+sets could theoretically produce the same measured accuracy.
+
+14. Metadata
+
+The compressed file needs metadata so that the data can be
+reconstructed.
+
+Potential metadata includes:
+
+-   tensor names
+-   tensor shapes
+-   data type
+-   number of values
+-   Huffman tree/code information
+-   padding information
+-   other information needed to reconstruct the original tensors
+
+Conceptually:
+
+    +---------------------------+
+    | Metadata                  |
+    +---------------------------+
+    | Tensor information        |
+    | Shape                     |
+    | Data type                 |
+    | Number of values          |
+    | Huffman information       |
+    | Padding information       |
+    +---------------------------+
+    | Compressed bitstream      |
+    +---------------------------+
+
+Metadata size MUST be included when reporting final compressed size.
+
+15. Important Technical Limitation
+
+Raw neural-network floating-point weights may contain many unique
+values.
+
+Huffman coding works best when symbols repeat with useful frequency
+differences.
+
+Therefore, directly applying Huffman coding to raw float values may
+result in little compression or even a larger final file after metadata
+overhead.
+
+This is a genuine limitation and should not be hidden.
+
+Quantization could create repeated values and improve Huffman
+compression, but quantization is generally lossy. Since the main project
+requires lossless compression, quantization should not replace the
+primary lossless implementation. It can be considered an optional
+extension.
+
+For exact lossless handling, we should treat the exact bit
+representation of the model’s values carefully rather than rounding
+decimal values.
+
+16. Compression Metrics
+
+We should measure:
+
+Original size: size of the original model/parameter representation.
+
+Compressed size: size of compressed data INCLUDING metadata and padding.
+
+Compression ratio:
+
+    CR = Original Size / Compressed Size
+
+Space saved percentage:
+
+    ((Original Size - Compressed Size) / Original Size) * 100
+
+Also measure:
+
+-   encoding time
+-   decoding time
+-   exact parameter equality
+-   prediction equality
+-   accuracy before compression
+-   accuracy after decompression
+
+17. Complexity
+
+Let:
+
+    N = total number of parameters/values
+    K = number of unique symbols/values
+
+Approximate complexity:
+
+    Frequency counting       -> O(N)
+    Huffman tree construction-> O(K log K)
+    Code generation          -> O(K)
+    Encoding                 -> approximately O(N)
+    Decoding                 -> O(number of encoded bits)
+
+Overall:
+
+    O(N + K log K)
+
+Space depends on the number of unique symbols, metadata, tree, code
+table, and stored model data.
+
+18. Flask
+
+Flask is only the basic web interface.
+
+We do NOT need an advanced frontend.
+
+Required concepts:
+
+-   Flask application
+-   routes
+-   GET
+-   POST
+-   request
+-   response
+-   file upload
+-   HTML templates
+-   displaying results
+
+Conceptual flow:
+
+    Browser
+       |
+       | HTTP request
+       v
+    Flask
+       |
+       v
+    Compression engine
+       |
+       v
+    Result
+       |
+       v
+    Browser
+
+19. Proposed Web Application
+
+Possible UI:
+
+    MODEL COMPRESSION TOOL
+
+    Upload trained model
+    [Choose File]
+
+    [Compress Model]
+
+    Original Size: ...
+    Compressed Size: ...
+    Compression Ratio: ...
+    Space Saved: ...
+
+    [Decompress & Verify]
+
+    Weights identical: YES/NO
+    Accuracy before: ...
+    Accuracy after: ...
+
+The frontend is deliberately simple because the assignment prioritizes
+DSA.
+
+20. Six-Member Group Strategy
+
+All six members want meaningful DSA contributions, so the project should
+be organized so that every member owns a substantial
+algorithmic/data-structure component.
+
+Suggested division:
+
+Member 1: Weight representation + frequency analysis - arrays/tensors -
+dictionaries/hash maps - frequency counting
+
+Member 2: Custom min-heap / min-priority queue - insert - extract_min -
+peek - heapify_up - heapify_down
+
+Member 3: Huffman node + tree construction - HuffmanNode - internal/leaf
+nodes - tree construction - traversal - recursive code generation
+
+Member 4: Huffman encoding - code table - prefix codes - symbol-to-code
+lookup - encoded bitstream creation
+
+Member 5: Huffman decoding + bit manipulation - tree traversal during
+decoding - bit reading - byte-to-bit handling - padding handling -
+reconstruction of original symbols
+
+Member 6: Compression format + verification - metadata structures -
+serialization - reconstruction logic - equality verification -
+compression metrics - algorithmic testing
+
+ML/PyTorch and Flask should be treated as supporting/integration work
+rather than giving one person an isolated “ML job” or “frontend job”.
+
+A primary + secondary ownership model is useful so everyone understands
+more than one component.
+
+21. Common Foundation for All Six Members
+
+Before splitting implementation work, all members should understand:
+
+    Dictionary
+        ->
+    Big-O
+        ->
+    Priority Queue
+        ->
+    Min-Heap
+        ->
+    Binary Tree
+        ->
+    Recursion
+        ->
+    Huffman Coding
+        ->
+    Prefix Codes
+        ->
+    Bits/Bytes
+
+Then the implementation can be divided.
+
+Every member should still understand the complete pipeline:
+
+    Model
+      ->
+    Weights
+      ->
+    Frequency Analysis
+      ->
+    Min-Heap
+      ->
+    Huffman Tree
+      ->
+    Huffman Codes
+      ->
+    Bit Encoding
+      ->
+    Compressed File
+      ->
+    Decoding
+      ->
+    Original Weights
+      ->
+    Model Reconstruction
+      ->
+    Verification
+
+22. Proposed Project Repository
+
+model-compression/ | +– huffman/ | +– frequency.py | +– node.py | +–
+min_heap.py | +– tree.py | +– encoder.py | +– decoder.py | +–
+bitstream.py | +– model/ | +– network.py | +– train.py | +– weights.py |
++– compression/ | +– format.py | +– compressor.py | +– decompressor.py |
++– evaluation/ | +– metrics.py | +– tests.py | +– web/ | +– app.py | +–
+templates/ | +– README.md +– requirements.txt +– understanding.txt
+
+23. Current Learning Strategy
+
+The project should be learned and built incrementally:
+
+    Learn concept
+        ->
+    Understand why it is needed
+        ->
+    Implement a small component
+        ->
+    Connect it to the previous component
+        ->
+    Test
+        ->
+    Move forward
+
+The goal is NOT to memorize code. Every data structure should be
+explainable in terms of:
+
+1.  What problem does it solve?
+
+2.  Why was it selected?
+
+3.  How is it implemented?
+
+4.  What operations does it support?
+
+5.  What is its time/space complexity?
+
+6.  How does it connect to the rest of the system?
+
+7.  Topics Still To Learn in Detail
+
+    The planned learning sequence is:
+
+8.  Big-O and algorithm analysis
+
+9.  Priority queue vs heap
+
+10. Min-heap implementation in detail
+
+11. Binary trees and tree traversal
+
+12. Recursion
+
+13. Huffman coding from first principles
+
+14. Prefix-free codes
+
+15. Bits, bytes, binary representation and bit packing
+
+16. Lossless compression and decompression
+
+17. Neural-network fundamentals
+
+18. Weights, biases, tensors and model parameters
+
+19. MNIST
+
+20. PyTorch basics
+
+21. Training loop
+
+22. model.state_dict()
+
+23. Model saving/loading
+
+24. Exact representation of model weights
+
+25. Integrating Huffman with model weights
+
+26. Metadata and custom compressed-file format
+
+27. Verification and evaluation
+
+28. Flask basics
+
+29. Final integration
+
+30. Testing
+
+31. Report and viva preparation
+
+32. Important Design Principle
+
+    The project should remain a DSA project with an ML use case.
+
+The neural network should be simple enough that it does not overshadow
+the actual compression work.
+
+The strongest demonstration is:
+
+    "We implemented the important compression data structures and algorithms
+     ourselves, used a small trained model as the input, compressed its
+     parameters, decompressed them, reconstructed the model, and verified
+     exact recovery."
+
+END OF CURRENT NOTES

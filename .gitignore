@@ -1,0 +1,13 @@
+# Python environment and cache
+myenv/
+__pycache__/
+*.py[cod]
+
+# Downloaded dataset
+data/
+
+# Trained model artifacts
+checkpoints/*.pth
+
+# Local environment settings
+.env
