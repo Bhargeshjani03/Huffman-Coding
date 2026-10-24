@@ -53,3 +53,20 @@ def test_weighted_path_length():
 def test_non_positive_frequency():
     with pytest.raises(ValueError):
         build_huffman_tree({"A": 0})
+
+
+def test_deterministic_output():
+    frequencies = {
+        "A": 5,
+        "B": 5,
+        "C": 5,
+        "D": 5,
+    }
+
+    root1 = build_huffman_tree(frequencies)
+    root2 = build_huffman_tree(frequencies)
+
+    codebook1 = generate_codebook(root1)
+    codebook2 = generate_codebook(root2)
+
+    assert codebook1 == codebook2
