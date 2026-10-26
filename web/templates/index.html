@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huffman Model Compressor</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/script.js" defer></script>
+</head>
+<body class="dark">
+
+<div class="container">
+
+    <header class="header">
+        <div>
+            <p class="eyebrow">DSA PROJECT · MNIST</p>
+            <h1>Huffman Model Compressor</h1>
+            <p>Lossless compression of machine-learning model weights</p>
+        </div>
+
+        <button id="themeBtn" class="theme-button">
+            ☀ Light Mode
+        </button>
+    </header>
+
+    <section class="panel intro">
+        <div>
+            <h2>Compression Overview</h2>
+            <p>Neural Network: 784 → 128 → 64 → 10</p>
+            <p>Algorithm: Huffman Coding</p>
+        </div>
+
+        <button id="runBtn" class="primary-button">
+            ▶ Run Compression
+        </button>
+    </section>
+
+    <p id="status" role="status">Loading saved results...</p>
+
+    <section class="metrics">
+        <article class="card">
+            <h3>Original Size</h3>
+            <strong id="originalSize">--</strong>
+            <small>Raw parameter bytes</small>
+        </article>
+
+        <article class="card">
+            <h3>Compressed Size</h3>
+            <strong id="compressedSize">--</strong>
+            <small>Complete HUFC container</small>
+        </article>
+
+        <article class="card">
+            <h3>Compression Ratio</h3>
+            <strong id="compressionRatio">--</strong>
+            <small>Original ÷ Compressed</small>
+        </article>
+
+        <article class="card">
+            <h3>Space Saved</h3>
+            <strong id="spaceSaved">--</strong>
+            <small>Storage reduction</small>
+        </article>
+    </section>
+
+    <section class="panel">
+        <h2>Model Size Comparison</h2>
+
+        <div class="bar-label">
+            <span>Original</span>
+            <span id="originalBarValue">--</span>
+        </div>
+        <div class="bar-track">
+            <div id="originalBar" class="bar original"></div>
+        </div>
+
+        <div class="bar-label">
+            <span>Compressed</span>
+            <span id="compressedBarValue">--</span>
+        </div>
+        <div class="bar-track">
+            <div id="compressedBar" class="bar compressed"></div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Accuracy Comparison</h2>
+
+        <div class="accuracy-grid">
+            <div class="accuracy-card">
+                <p>Before Compression</p>
+                <strong id="accuracyBefore">--</strong>
+            </div>
+
+            <div class="accuracy-card">
+                <p>After Decompression</p>
+                <strong id="accuracyAfter">--</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Lossless Verification</h2>
+
+        <div class="detail-row">
+            <span>Byte Equality</span>
+            <strong id="bytesIdentical">--</strong>
+        </div>
+
+        <div class="detail-row">
+            <span>Weights Equality</span>
+            <strong id="weightsIdentical">--</strong>
+        </div>
+
+        <div class="detail-row">
+            <span>Predictions Equality</span>
+            <strong id="predictionsIdentical">--</strong>
+        </div>
+
+        <div class="detail-row">
+            <span>Number of Tensors</span>
+            <strong id="tensorCount">--</strong>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Execution Performance</h2>
+
+        <div class="accuracy-grid">
+            <div class="accuracy-card">
+                <p>Encoding Time</p>
+                <strong id="encodingTime">--</strong>
+            </div>
+
+            <div class="accuracy-card">
+                <p>Decoding Time</p>
+                <strong id="decodingTime">--</strong>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        Model Compression using Huffman Coding · DSA Project
+    </footer>
+
+</div>
+
+</body>
+</html>
