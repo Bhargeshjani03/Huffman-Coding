@@ -1,0 +1,14 @@
+{
+    "dataset": "MNIST",
+    "architecture": "784-128-64-10 feed-forward network",
+    "epochs": 5,
+    "seed": 42,
+    "dtype": "float32",
+    "parameter_count": 109386,
+    "test_examples": 10000,
+    "test_accuracy": 0.9729,
+    "test_accuracy_percent": 97.28999999999999,
+    "training_seconds": 4.271545583999796,
+    "checkpoint": "checkpoints/mnist_model.pth",
+    "device": "cpu"
+}
