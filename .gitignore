@@ -6,8 +6,6 @@ __pycache__/
 # Downloaded dataset
 data/
 
-# Trained model artifacts
-checkpoints/*.pth
 
 # Local environment settings
 .env

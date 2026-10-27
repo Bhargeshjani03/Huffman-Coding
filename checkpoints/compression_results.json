@@ -1,0 +1,15 @@
+{
+    "original_size": 437544,
+    "compressed_size": 415309,
+    "compression_ratio": 1.0535384496844518,
+    "space_saved_percent": 5.0817746329512,
+    "encoding_seconds": 0.1751641670000481,
+    "decoding_seconds": 0.2910746250000784,
+    "tensor_count": 6,
+    "bytes_identical": true,
+    "weights_identical": true,
+    "accuracy_before": 97.28999999999999,
+    "accuracy_after": 97.28999999999999,
+    "predictions_identical": true,
+    "compressed_file": "mnist_model.huf"
+}
