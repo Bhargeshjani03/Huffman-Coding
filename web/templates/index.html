@@ -1,148 +1,992 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Huffman Model Compressor</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="/static/script.js" defer></script>
+
+    <meta name="description"
+          content="Lossless neural network weight compression using custom Huffman coding.">
+
+    <title>Huffman Lab | Model Compression</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
-<body class="dark">
 
-<div class="container">
+<body>
 
-    <header class="header">
-        <div>
-            <p class="eyebrow">DSA PROJECT · MNIST</p>
-            <h1>Huffman Model Compressor</h1>
-            <p>Lossless compression of machine-learning model weights</p>
-        </div>
+<div class="app-shell">
 
-        <button id="themeBtn" class="theme-button">
-            ☀ Light Mode
-        </button>
-    </header>
+    <!-- SIDEBAR -->
 
-    <section class="panel intro">
-        <div>
-            <h2>Compression Overview</h2>
-            <p>Neural Network: 784 → 128 → 64 → 10</p>
-            <p>Algorithm: Huffman Coding</p>
-        </div>
+    <aside class="sidebar" id="sidebar">
 
-        <button id="runBtn" class="primary-button">
-            ▶ Run Compression
-        </button>
-    </section>
+        <div class="brand">
+            <div class="brand-icon">H</div>
 
-    <p id="status" role="status">Loading saved results...</p>
-
-    <section class="metrics">
-        <article class="card">
-            <h3>Original Size</h3>
-            <strong id="originalSize">--</strong>
-            <small>Raw parameter bytes</small>
-        </article>
-
-        <article class="card">
-            <h3>Compressed Size</h3>
-            <strong id="compressedSize">--</strong>
-            <small>Complete HUFC container</small>
-        </article>
-
-        <article class="card">
-            <h3>Compression Ratio</h3>
-            <strong id="compressionRatio">--</strong>
-            <small>Original ÷ Compressed</small>
-        </article>
-
-        <article class="card">
-            <h3>Space Saved</h3>
-            <strong id="spaceSaved">--</strong>
-            <small>Storage reduction</small>
-        </article>
-    </section>
-
-    <section class="panel">
-        <h2>Model Size Comparison</h2>
-
-        <div class="bar-label">
-            <span>Original</span>
-            <span id="originalBarValue">--</span>
-        </div>
-        <div class="bar-track">
-            <div id="originalBar" class="bar original"></div>
-        </div>
-
-        <div class="bar-label">
-            <span>Compressed</span>
-            <span id="compressedBarValue">--</span>
-        </div>
-        <div class="bar-track">
-            <div id="compressedBar" class="bar compressed"></div>
-        </div>
-    </section>
-
-    <section class="panel">
-        <h2>Accuracy Comparison</h2>
-
-        <div class="accuracy-grid">
-            <div class="accuracy-card">
-                <p>Before Compression</p>
-                <strong id="accuracyBefore">--</strong>
-            </div>
-
-            <div class="accuracy-card">
-                <p>After Decompression</p>
-                <strong id="accuracyAfter">--</strong>
+            <div class="brand-text">
+                <h2>Huffman<span>Lab</span></h2>
+                <p>MODEL COMPRESSION</p>
             </div>
         </div>
-    </section>
 
-    <section class="panel">
-        <h2>Lossless Verification</h2>
+        <div class="sidebar-label">WORKSPACE</div>
 
-        <div class="detail-row">
-            <span>Byte Equality</span>
-            <strong id="bytesIdentical">--</strong>
-        </div>
+        <nav class="sidebar-nav">
 
-        <div class="detail-row">
-            <span>Weights Equality</span>
-            <strong id="weightsIdentical">--</strong>
-        </div>
+            <a href="#overview" class="nav-link active">
+                <span class="nav-icon">◫</span>
+                <span>Overview</span>
+            </a>
 
-        <div class="detail-row">
-            <span>Predictions Equality</span>
-            <strong id="predictionsIdentical">--</strong>
-        </div>
+            <a href="#analysis" class="nav-link">
+                <span class="nav-icon">▥</span>
+                <span>Compression Analysis</span>
+            </a>
 
-        <div class="detail-row">
-            <span>Number of Tensors</span>
-            <strong id="tensorCount">--</strong>
-        </div>
-    </section>
+            <a href="#algorithm" class="nav-link">
+                <span class="nav-icon">⑂</span>
+                <span>Huffman Algorithm</span>
+            </a>
 
-    <section class="panel">
-        <h2>Execution Performance</h2>
+            <a href="#verification" class="nav-link">
+                <span class="nav-icon">✓</span>
+                <span>Lossless Verification</span>
+            </a>
 
-        <div class="accuracy-grid">
-            <div class="accuracy-card">
-                <p>Encoding Time</p>
-                <strong id="encodingTime">--</strong>
+            <a href="#performance" class="nav-link">
+                <span class="nav-icon">◷</span>
+                <span>Performance</span>
+            </a>
+
+            <a href="#project" class="nav-link">
+                <span class="nav-icon">⌘</span>
+                <span>Project Details</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-project">
+                <div class="project-indicator"></div>
+
+                <div>
+                    <strong>MNIST Neural Network</strong>
+                    <small>784 → 128 → 64 → 10</small>
+                </div>
             </div>
 
-            <div class="accuracy-card">
-                <p>Decoding Time</p>
-                <strong id="decodingTime">--</strong>
+            <div class="sidebar-footer">
+                DSA PROJECT · 2026
             </div>
-        </div>
-    </section>
 
-    <footer>
-        Model Compression using Huffman Coding · DSA Project
-    </footer>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button id="menuBtn"
+                        class="icon-button menu-button"
+                        aria-label="Toggle navigation">
+                    ☰
+                </button>
+
+                <div>
+                    <p class="breadcrumb">WORKSPACE / <span id="currentPage">OVERVIEW</span></p>
+                    <h1 id="pageHeading">Model Compression Dashboard</h1>
+                </div>
+
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    <span>Local System</span>
+                </div>
+
+                <button id="themeBtn"
+                        class="theme-button"
+                        aria-label="Toggle light and dark theme">
+                    <span id="themeIcon">☀</span>
+                    <span id="themeText">Light mode</span>
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENT AREA -->
+
+        <div class="content-wrapper">
+
+
+            <!-- 1. OVERVIEW -->
+
+            <section id="overview" class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <p class="section-kicker">PROJECT OVERVIEW</p>
+                        <h2>Compression at a glance</h2>
+                        <p class="section-description">
+                            Monitor model size, compression efficiency and
+                            lossless reconstruction.
+                        </p>
+                    </div>
+
+                    <button id="runBtn" class="primary-button">
+                        <span>▶</span>
+                        <span id="runBtnText">Run Compression</span>
+                    </button>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div id="status" class="status-message" role="status">
+                    Loading saved compression results...
+                </div>
+
+
+                <!-- METRIC CARDS -->
+
+                <div class="metrics-grid">
+
+                    <article class="metric-card">
+
+                        <div class="metric-top">
+                            <span>Original Size</span>
+                            <span class="metric-icon">▤</span>
+                        </div>
+
+                        <strong id="originalSize">--</strong>
+
+                        <div class="metric-bottom">
+                            Raw parameter bytes
+                        </div>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <div class="metric-top">
+                            <span>Compressed Size</span>
+                            <span class="metric-icon">▣</span>
+                        </div>
+
+                        <strong id="compressedSize">--</strong>
+
+                        <div class="metric-bottom">
+                            Complete HUFC container
+                        </div>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <div class="metric-top">
+                            <span>Compression Ratio</span>
+                            <span class="metric-icon">↗</span>
+                        </div>
+
+                        <strong id="compressionRatio">--</strong>
+
+                        <div class="metric-bottom">
+                            Original ÷ compressed
+                        </div>
+
+                    </article>
+
+
+                    <article class="metric-card">
+
+                        <div class="metric-top">
+                            <span>Space Saved</span>
+                            <span class="metric-icon">◉</span>
+                        </div>
+
+                        <strong id="spaceSaved">--</strong>
+
+                        <div class="metric-bottom">
+                            Net storage reduction
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- SIZE COMPARISON -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h3>Model Size Comparison</h3>
+                            <p>Before and after Huffman encoding</p>
+                        </div>
+
+                        <span class="panel-tag">STORAGE</span>
+
+                    </div>
+
+                    <div class="size-comparison">
+
+                        <div class="bar-label">
+                            <span>Original model parameters</span>
+                            <strong id="originalBarValue">--</strong>
+                        </div>
+
+                        <div class="bar-track">
+                            <div id="originalBar" class="bar original"></div>
+                        </div>
+
+
+                        <div class="bar-label">
+                            <span>Compressed HUFC container</span>
+                            <strong id="compressedBarValue">--</strong>
+                        </div>
+
+                        <div class="bar-track">
+                            <div id="compressedBar" class="bar compressed"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="chart-note">
+                        <span class="note-dot"></span>
+                        Compressed size includes the container metadata and
+                        encoding overhead.
+                    </div>
+
+                </div>
+
+
+                <!-- QUICK VERIFICATION -->
+
+                <div class="overview-bottom-grid">
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <h3>Model Accuracy</h3>
+                                <p>Original versus reconstructed model</p>
+                            </div>
+                        </div>
+
+                        <div class="accuracy-grid">
+
+                            <div class="accuracy-card">
+                                <span>Before compression</span>
+                                <strong id="accuracyBefore">--</strong>
+                            </div>
+
+                            <div class="accuracy-card">
+                                <span>After decompression</span>
+                                <strong id="accuracyAfter">--</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+                            <div>
+                                <h3>Verification Status</h3>
+                                <p>Exact reconstruction checks</p>
+                            </div>
+                        </div>
+
+                        <div class="verification-list">
+
+                            <div class="verification-row">
+                                <span>Byte equality</span>
+                                <strong id="bytesIdentical">--</strong>
+                            </div>
+
+                            <div class="verification-row">
+                                <span>Weight equality</span>
+                                <strong id="weightsIdentical">--</strong>
+                            </div>
+
+                            <div class="verification-row">
+                                <span>Prediction equality</span>
+                                <strong id="predictionsIdentical">--</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- 2. COMPRESSION ANALYSIS -->
+
+            <section id="analysis" class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <p class="section-kicker">DATA ANALYSIS</p>
+                        <h2>Compression Analysis</h2>
+                        <p class="section-description">
+                            Explore the byte-level characteristics of the
+                            model parameters.
+                        </p>
+                    </div>
+
+                    <span class="panel-tag">HUFFMAN ENCODING</span>
+
+                </div>
+
+
+                <div class="analysis-summary-grid">
+
+                    <div class="panel analysis-stat">
+                        <span>Payload Bytes</span>
+                        <strong id="analysisTotalBytes">--</strong>
+                    </div>
+
+                    <div class="panel analysis-stat">
+                        <span>Distinct Byte Symbols</span>
+                        <strong id="distinctSymbols">--</strong>
+                    </div>
+
+                    <div class="panel analysis-stat">
+                        <span>Average Code Length</span>
+                        <strong id="averageCodeLength">--</strong>
+                    </div>
+
+                    <div class="panel analysis-stat">
+                        <span>Theoretical Encoded Bits</span>
+                        <strong id="theoreticalBits">--</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- FREQUENCY DISTRIBUTION -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h3>Byte Frequency Distribution</h3>
+                            <p>Most frequent byte values in the model payload</p>
+                        </div>
+
+                        <span class="panel-tag">TOP 20</span>
+
+                    </div>
+
+                    <div id="frequencyChart" class="frequency-chart">
+
+                        <div class="empty-state">
+                            Frequency data will appear here.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONTAINER COMPOSITION -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h3>Container Composition</h3>
+                            <p>Encoded data and container overhead</p>
+                        </div>
+
+                    </div>
+
+                    <div class="composition-layout">
+
+                        <div class="composition-visual">
+
+                            <div id="compositionRing"
+                                 class="composition-ring">
+
+                                <div class="composition-center">
+                                    <strong id="compositionPercent">--</strong>
+                                    <span>Payload</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="composition-legend">
+
+                            <div class="legend-item">
+                                <span class="legend-color payload-color"></span>
+                                <div>
+                                    <strong>Encoded payload</strong>
+                                    <small id="payloadSize">--</small>
+                                </div>
+                            </div>
+
+                            <div class="legend-item">
+                                <span class="legend-color overhead-color"></span>
+                                <div>
+                                    <strong>Container overhead</strong>
+                                    <small id="overheadSize">--</small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- 3. HUFFMAN ALGORITHM -->
+
+            <section id="algorithm" class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <p class="section-kicker">ALGORITHM EXPLORER</p>
+                        <h2>Huffman Algorithm</h2>
+                        <p class="section-description">
+                            Inspect the generated Huffman tree and
+                            symbol-to-code mappings.
+                        </p>
+                    </div>
+
+                    <span class="panel-tag">CUSTOM IMPLEMENTATION</span>
+
+                </div>
+
+
+                <!-- TREE -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h3>Huffman Tree</h3>
+                            <p>
+                                Internal nodes represent combined frequencies.
+                                Leaf nodes represent byte symbols.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="tree-legend">
+
+                        <span>
+                            <i class="tree-node-leaf"></i>
+                            Leaf node
+                        </span>
+
+                        <span>
+                            <i class="tree-node-internal"></i>
+                            Internal node
+                        </span>
+
+                    </div>
+
+                    <div id="huffmanTree" class="huffman-tree">
+
+                        <div class="empty-state">
+                            Huffman tree will appear here.
+                        </div>
+
+                    </div>
+
+                    <p class="chart-note">
+                        Tree visualisation is limited to a readable depth.
+                        The underlying Huffman tree is generated from the
+                        complete byte-frequency distribution.
+                    </p>
+
+                </div>
+
+
+                <!-- CODEBOOK -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h3>Huffman Codebook</h3>
+                            <p>Byte symbols and their generated binary codes</p>
+                        </div>
+
+                        <span class="panel-tag">TOP 32 SYMBOLS</span>
+
+                    </div>
+
+                    <div class="table-container">
+
+                        <table class="data-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Byte</th>
+                                    <th>Hex</th>
+                                    <th>Frequency</th>
+                                    <th>Huffman Code</th>
+                                    <th>Code Length</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="codebookBody">
+
+                                <tr>
+                                    <td colspan="5" class="empty-table">
+                                        Codebook data will appear here.
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- WORKFLOW -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Compression Workflow</h3>
+                            <p>How the custom implementation processes model weights</p>
+                        </div>
+                    </div>
+
+                    <div class="workflow">
+
+                        <div class="workflow-step">
+                            <span class="workflow-number">01</span>
+                            <strong>Extract</strong>
+                            <p>Convert model tensors into a byte payload.</p>
+                        </div>
+
+                        <div class="workflow-arrow">→</div>
+
+                        <div class="workflow-step">
+                            <span class="workflow-number">02</span>
+                            <strong>Count</strong>
+                            <p>Calculate the frequency of each byte.</p>
+                        </div>
+
+                        <div class="workflow-arrow">→</div>
+
+                        <div class="workflow-step">
+                            <span class="workflow-number">03</span>
+                            <strong>Build</strong>
+                            <p>Construct the Huffman tree using a min-heap.</p>
+                        </div>
+
+                        <div class="workflow-arrow">→</div>
+
+                        <div class="workflow-step">
+                            <span class="workflow-number">04</span>
+                            <strong>Encode</strong>
+                            <p>Generate binary codes and build the HUFC container.</p>
+                        </div>
+
+                        <div class="workflow-arrow">→</div>
+
+                        <div class="workflow-step">
+                            <span class="workflow-number">05</span>
+                            <strong>Verify</strong>
+                            <p>Decode and compare the reconstructed payload.</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- 4. LOSSLESS VERIFICATION -->
+
+            <section id="verification" class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <p class="section-kicker">INTEGRITY CHECK</p>
+                        <h2>Lossless Verification</h2>
+                        <p class="section-description">
+                            Confirm that compression and decompression preserve
+                            the original model exactly.
+                        </p>
+                    </div>
+
+                    <span class="panel-tag">EXACT RECONSTRUCTION</span>
+
+                </div>
+
+
+                <div class="verification-banner">
+
+                    <div class="verification-banner-icon">✓</div>
+
+                    <div>
+                        <h3>Lossless reconstruction</h3>
+                        <p>
+                            The decompressed payload should reproduce the
+                            original parameter bytes without modification.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Verification Results</h3>
+                            <p>Results from the actual integration pipeline</p>
+                        </div>
+                    </div>
+
+                    <div class="verification-list large">
+
+                        <div class="verification-row">
+                            <div>
+                                <strong>Byte-level equality</strong>
+                                <small>Original payload versus decoded payload</small>
+                            </div>
+                            <strong id="bytesIdenticalDetail">--</strong>
+                        </div>
+
+                        <div class="verification-row">
+                            <div>
+                                <strong>Tensor weight equality</strong>
+                                <small>Original model parameters versus reconstructed parameters</small>
+                            </div>
+                            <strong id="weightsIdenticalDetail">--</strong>
+                        </div>
+
+                        <div class="verification-row">
+                            <div>
+                                <strong>Prediction equality</strong>
+                                <small>Original model versus restored model</small>
+                            </div>
+                            <strong id="predictionsIdenticalDetail">--</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Accuracy Preservation</h3>
+                            <p>MNIST test-set accuracy comparison</p>
+                        </div>
+                    </div>
+
+                    <div class="accuracy-grid">
+
+                        <div class="accuracy-card">
+                            <span>Original model</span>
+                            <strong id="verificationAccuracyBefore">--</strong>
+                        </div>
+
+                        <div class="accuracy-card">
+                            <span>Restored model</span>
+                            <strong id="verificationAccuracyAfter">--</strong>
+                        </div>
+
+                    </div>
+
+                    <p class="chart-note">
+                        Equal predictions and equal reconstructed weights
+                        demonstrate that decompression preserves the model.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- 5. PERFORMANCE -->
+
+            <section id="performance" class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <p class="section-kicker">EXECUTION METRICS</p>
+                        <h2>Performance Analysis</h2>
+                        <p class="section-description">
+                            Measure the time required for Huffman encoding
+                            and decoding.
+                        </p>
+                    </div>
+
+                    <span class="panel-tag">EXECUTION TIME</span>
+
+                </div>
+
+
+                <div class="performance-grid">
+
+                    <div class="panel performance-card">
+
+                        <span class="performance-label">Encoding Time</span>
+
+                        <strong id="encodingTime">--</strong>
+
+                        <small>Time to construct and encode the container</small>
+
+                    </div>
+
+
+                    <div class="panel performance-card">
+
+                        <span class="performance-label">Decoding Time</span>
+
+                        <strong id="decodingTime">--</strong>
+
+                        <small>Time to decode the compressed container</small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Execution Time Comparison</h3>
+                            <p>Encoding versus decoding duration</p>
+                        </div>
+                    </div>
+
+                    <div class="time-comparison">
+
+                        <div class="bar-label">
+                            <span>Encoding</span>
+                            <strong id="encodingBarValue">--</strong>
+                        </div>
+
+                        <div class="bar-track">
+                            <div id="encodingBar" class="bar encoding"></div>
+                        </div>
+
+                        <div class="bar-label">
+                            <span>Decoding</span>
+                            <strong id="decodingBarValue">--</strong>
+                        </div>
+
+                        <div class="bar-track">
+                            <div id="decodingBar" class="bar decoding"></div>
+                        </div>
+
+                    </div>
+
+                    <p class="chart-note">
+                        Execution times depend on the hardware and system load.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- 6. PROJECT DETAILS -->
+
+            <section id="project" class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <p class="section-kicker">ABOUT THE PROJECT</p>
+                        <h2>Project Details</h2>
+                        <p class="section-description">
+                            Technical overview of the model compression system.
+                        </p>
+                    </div>
+
+                    <span class="panel-tag">DATA STRUCTURES & ALGORITHMS</span>
+
+                </div>
+
+
+                <div class="panel project-intro">
+
+                    <div class="project-logo">H</div>
+
+                    <div>
+                        <h3>Model Compression using Huffman Coding</h3>
+
+                        <p>
+                            A lossless model-weight compression system that
+                            implements Huffman coding from scratch and applies
+                            it to a trained MNIST neural network.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="project-details-grid">
+
+                    <div class="panel detail-card">
+                        <span>Dataset</span>
+                        <strong>MNIST</strong>
+                        <small>Handwritten digit recognition</small>
+                    </div>
+
+                    <div class="panel detail-card">
+                        <span>Model Architecture</span>
+                        <strong>784 → 128 → 64 → 10</strong>
+                        <small>Fully connected neural network</small>
+                    </div>
+
+                    <div class="panel detail-card">
+                        <span>Algorithm</span>
+                        <strong>Huffman Coding</strong>
+                        <small>Lossless entropy encoding</small>
+                    </div>
+
+                    <div class="panel detail-card">
+                        <span>Container Format</span>
+                        <strong>HUFC</strong>
+                        <small>Custom compressed file format</small>
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Core Data Structures</h3>
+                            <p>Implemented as part of the project</p>
+                        </div>
+                    </div>
+
+                    <div class="technology-list">
+
+                        <div class="technology-item">
+                            <strong>Min Heap</strong>
+                            <span>Efficient minimum-frequency extraction</span>
+                        </div>
+
+                        <div class="technology-item">
+                            <strong>Binary Tree</strong>
+                            <span>Huffman tree construction</span>
+                        </div>
+
+                        <div class="technology-item">
+                            <strong>Dictionary</strong>
+                            <span>Frequency table and codebook mapping</span>
+                        </div>
+
+                        <div class="technology-item">
+                            <strong>Bitstream</strong>
+                            <span>Binary encoding and decoding</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Technology Stack</h3>
+                            <p>Tools and libraries used</p>
+                        </div>
+                    </div>
+
+                    <div class="tech-tags">
+                        <span>Python</span>
+                        <span>PyTorch</span>
+                        <span>NumPy</span>
+                        <span>Flask</span>
+                        <span>HTML</span>
+                        <span>CSS</span>
+                        <span>JavaScript</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- FOOTER -->
+
+            <footer class="footer">
+
+                <div>
+                    <strong>HuffmanLab</strong>
+                    <span>Lossless Model Compression</span>
+                </div>
+
+                <span>Built for DSA Project · 2026</span>
+
+            </footer>
+
+        </div>
+
+    </main>
 
 </div>
 

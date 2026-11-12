@@ -8,4 +8,4 @@ data/
 
 
 # Local environment settings
-.env
+.env.DS_Store
